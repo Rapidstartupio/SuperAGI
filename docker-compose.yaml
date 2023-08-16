@@ -54,11 +54,11 @@ services:
 #    uncomment to expose postgres port to host
 #    ports:
 #      - "5432:5432"
-  
+
   proxy:
     image: nginx:stable-alpine
     ports:
-      - "3000:80"
+      - "3001:80"
     networks:
       - super_network
     depends_on:
