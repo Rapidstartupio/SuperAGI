@@ -1,0 +1,30 @@
+name: Deploy to production
+
+on:
+  push:
+    branches:
+      - main  # Change this to your production branch, if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Deploy to production
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << EOF
+            rm -r SuperAGI
+            git clone https://x-access-token:${{ secrets.ORG_GH_TOKEN }}@github.com/Rapidstartupio/SuperAGI.git
+            cd SuperAGI
+            cp config_template.yaml config.yaml
+            sed -i 's/YOUR_OPEN_API_KEY/${{ secrets.OPENAI_KEY }}/g' config.yaml
+            docker-compose up -d --force-recreate --build
+          EOF
